@@ -1,4 +1,5 @@
 # Temporizador Secuencial
+<img width="571" height="1280" alt="image" src="https://github.com/user-attachments/assets/bdd7229c-ea04-4fb3-ac12-d351f08acad7" />
 
 Aplicación móvil de productividad para Android desarrollada en **React Native** con **Expo**, que permite ejecutar secuencias temporizadas agrupadas en rutinas, con control de voz, sonidos y almacenamiento local en **SQLite**.
 Diseñada para uso personal, sin backend ni cuentas.
