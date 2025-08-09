@@ -21,7 +21,9 @@ import { listSequencesByGroup } from "../../data/repositories/sequencesRepo";
 import { Group } from "../../domain/models";
 import { computeTotalMinutes } from "../../domain/usecases/computeGroupDuration";
 import { importSingleGroup } from "../../domain/usecases/importExport";
+import { formateaTiempo } from "../../utils/formateaTiempo";
 import { uuidv4 } from "../../utils/uuid";
+import GroupRenameDialog from "../components/GroupRenameDialog";
 
 type P = NativeStackScreenProps<RootStackParamList, "Groups">;
 
@@ -29,6 +31,9 @@ export default function GroupsScreen({ navigation }: P) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [newName, setNewName] = useState("");
   const [snack, setSnack] = useState<string>("");
+  const [rename, setRename] = useState<{ id: string; name: string } | null>(
+    null
+  );
 
   async function refresh() {
     setGroups(await listGroups());
@@ -66,7 +71,7 @@ export default function GroupsScreen({ navigation }: P) {
                 refresh();
               }}
             >
-              Añair
+              Crear
             </Button>
           </View>
           <View style={{ flexDirection: "row", gap: 8 }}>
@@ -101,14 +106,7 @@ export default function GroupsScreen({ navigation }: P) {
           key={g.id}
           g={g}
           onOpen={() => navigation.navigate("GroupDetail", { groupId: g.id })}
-          onRename={async () => {
-            const nuevo =
-              (global as any).__prompt?.("Nuevo nombre", g.name) ?? g.name;
-            if (nuevo && nuevo.trim()) {
-              await updateGroupName(g.id, nuevo.trim());
-              refresh();
-            }
-          }}
+          onRename={() => setRename({ id: g.id, name: g.name })}
           onDelete={async () => {
             await deleteGroup(g.id);
             refresh();
@@ -123,6 +121,19 @@ export default function GroupsScreen({ navigation }: P) {
       >
         {snack}
       </Snackbar>
+
+      <GroupRenameDialog
+        visible={!!rename}
+        initialName={rename?.name || ""}
+        onCancel={() => setRename(null)}
+        onSave={async (name) => {
+          if (rename) {
+            await updateGroupName(rename.id, name);
+            setRename(null);
+            refresh();
+          }
+        }}
+      />
     </View>
   );
 }
@@ -144,13 +155,13 @@ function GroupRow({
       const seqs = await listSequencesByGroup(g.id);
       setTotal(computeTotalMinutes(seqs));
     })();
-  }, [g.id]);
+  }, []);
 
   return (
     <Card style={{ marginTop: 8 }} onPress={onOpen}>
       <Card.Title
         title={g.name}
-        subtitle={`${total} min`}
+        subtitle={formateaTiempo(total)}
         right={() => (
           <View style={{ flexDirection: "row" }}>
             <IconButton icon="pencil" onPress={onRename} />

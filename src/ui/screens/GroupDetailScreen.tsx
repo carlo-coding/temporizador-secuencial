@@ -15,6 +15,7 @@ import { getGroup } from "../../data/repositories/groupsRepo";
 import {
   bumpOrder,
   deleteSequence,
+  getNextOrderIndex,
   insertSequence,
   listSequencesByGroup,
   updateSequence,
@@ -38,8 +39,9 @@ import {
 } from "../../runtime/timerEngine";
 import { speak } from "../../runtime/tts";
 import { minutesToMs, msToHHMMSS } from "../../utils/format";
+import { formateaTiempo } from "../../utils/formateaTiempo";
 import { uuidv4 } from "../../utils/uuid";
-import SequenceEditorModal from "../components/SequenceEditorModal";
+import SequenceEditorDialog from "../components/SequenceEditorDialog";
 import SequenceItem from "../components/SequenceItem";
 
 type P = NativeStackScreenProps<RootStackParamList, "GroupDetail">;
@@ -77,7 +79,7 @@ export default function GroupDetailScreen({ route }: P) {
     if (settings.tickTackEnabled) playTick(settings.tickTackVolume);
     else stopTick();
 
-    if (settings.announceStart) speak(s.title);
+    if (settings.announceStart) speak(s.title, s.durationMinutes);
 
     runtime.setState({ currentGroupId: groupId, currentSequenceIndex: index });
     startTimer(minutesToMs(s.durationMinutes), async () => {
@@ -101,7 +103,7 @@ export default function GroupDetailScreen({ route }: P) {
   return (
     <View style={{ flex: 1, padding: 12, paddingBottom: 12 + insets.bottom }}>
       <Text variant="titleLarge">
-        {groupName} — Total {totalMinutes} min
+        {groupName} — Total {formateaTiempo(totalMinutes, true)}
       </Text>
 
       <Card style={{ marginVertical: 8 }}>
@@ -260,11 +262,11 @@ export default function GroupDetailScreen({ route }: P) {
       />
 
       {editor && (
-        <SequenceEditorModal
+        <SequenceEditorDialog
           visible={editor.visible}
           initial={(() => {
             if (!editor.editId)
-              return { emoji: "", title: "", minutes: 1, colorHex: "#2D6E80" };
+              return { emoji: "", title: "", minutes: 1, colorHex: "#12739F" };
             const s = seqs.find((x) => x.id === editor.editId)!;
             return {
               emoji: s.emoji || "",
@@ -276,10 +278,12 @@ export default function GroupDetailScreen({ route }: P) {
           onCancel={() => setEditor(null)}
           onSave={async (val) => {
             if (!editor?.editId) {
+              // NUEVO: orderIndex seguro con MAX+1
+              const nextIdx = await getNextOrderIndex(groupId);
               await insertSequence({
                 id: uuidv4(),
                 groupId,
-                orderIndex: seqs.length,
+                orderIndex: nextIdx,
                 emoji: val.emoji,
                 title: val.title,
                 durationMinutes: Math.max(1, val.minutes),
@@ -296,7 +300,7 @@ export default function GroupDetailScreen({ route }: P) {
               });
             }
             setEditor(null);
-            refresh();
+            await refresh();
           }}
         />
       )}

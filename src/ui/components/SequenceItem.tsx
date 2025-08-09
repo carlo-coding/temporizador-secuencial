@@ -1,6 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { Badge, Card, IconButton, Text } from "react-native-paper";
+import { formateaTiempo } from "../../utils/formateaTiempo";
 
 export default function SequenceItem({
   index,
@@ -39,8 +40,8 @@ export default function SequenceItem({
             {index + 1}. {emoji ? `${emoji} ` : ""}
             {title}
           </Text>
-          <Badge size={26} style={{ backgroundColor: colorHex }}>
-            {minutes + "m"}
+          <Badge size={26} style={{ backgroundColor: colorHex, width: 70 }}>
+            {formateaTiempo(minutes, true)}
           </Badge>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>

@@ -108,3 +108,13 @@ export async function bumpOrder(
     throw e;
   }
 }
+
+export async function getNextOrderIndex(groupId: string): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ max: number | null }>(
+    `SELECT MAX(orderIndex) as max FROM Sequences WHERE groupId=?`,
+    [groupId]
+  );
+  const max = row?.max ?? -1;
+  return (typeof max === "number" ? max : Number(max)) + 1;
+}

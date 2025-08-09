@@ -14,7 +14,9 @@
     },
     "android": {
       "package": "com.tu.nombre.temporizadorsecuencial",
-      "permissions": ["VIBRATE"],
+      "permissions": [
+        "VIBRATE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
@@ -23,11 +25,16 @@
     "plugins": [
       [
         "expo-notifications",
-        { "icon": "./assets/notification-icon.png", "color": "#000000" }
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#000000"
+        }
       ]
     ],
     "extra": {
-      "eas": { "projectId": "FILL_ME_BY_EAS" }
+      "eas": {
+        "projectId": "46e4da06-f0aa-4bb9-97a3-7d03d76d4d5e"
+      }
     }
   }
 }
