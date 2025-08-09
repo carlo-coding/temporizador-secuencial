@@ -13,8 +13,8 @@ export type Sequence = {
   orderIndex: number;
   emoji?: string | null;
   title: string;
-  durationMinutes: number; // >= 1
-  colorHex: string; // #RRGGBB
+  durationMinutes: number;
+  colorHex: string;
 };
 
 export type Settings = {
@@ -22,7 +22,7 @@ export type Settings = {
   announceCountdown: boolean;
   tickTackEnabled: boolean;
   alarmEnabled: boolean;
-  tickTackVolume: number; // 0..1
+  tickTackVolume: number;
 };
 
 export type RuntimeStatus = "idle" | "running" | "paused";
@@ -32,5 +32,5 @@ export type RuntimeState = {
   currentSequenceIndex: number;
   remainingMillis: number;
   status: RuntimeStatus;
-  endTime?: number | null; // para re-cálculo tras foco
+  endTime?: number | null;
 };

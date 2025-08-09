@@ -214,7 +214,6 @@ export default function GroupDetailScreen({ route }: P) {
       </View>
       <Divider />
 
-      {/* Lista simple (reusa SequenceItem existente) */}
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}>
         {seqs.map((item, index) => (
           <View key={item.id}>
@@ -278,7 +277,6 @@ export default function GroupDetailScreen({ route }: P) {
           onCancel={() => setEditor(null)}
           onSave={async (val) => {
             if (!editor?.editId) {
-              // NUEVO: orderIndex seguro con MAX+1
               const nextIdx = await getNextOrderIndex(groupId);
               await insertSequence({
                 id: uuidv4(),

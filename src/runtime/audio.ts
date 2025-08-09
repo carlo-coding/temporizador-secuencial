@@ -24,8 +24,8 @@ export async function playTick(volume: number) {
     }
     await tickSound.setVolumeAsync(volume);
     await tickSound.playAsync();
-  } catch {
-    // sin asset: ignoramos
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -45,7 +45,7 @@ export async function playAlarmOnce() {
       });
     }
     await alarmSound.replayAsync();
-  } catch {
-    // sin asset: ignoramos
+  } catch (e) {
+    console.error(e);
   }
 }

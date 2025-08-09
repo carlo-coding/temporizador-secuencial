@@ -1,7 +1,7 @@
 import { useRuntime } from "./runtimeStore";
 
 let tickHandle: any = null;
-let targetEnd = 0; // millis absolutos
+let targetEnd = 0;
 let onComplete: (() => void) | null = null;
 
 function stopTick() {
@@ -35,13 +35,11 @@ export function startTimer(durationMs: number, onDone?: () => void) {
   onComplete = onDone ?? null;
   const now = Date.now();
   targetEnd = now + durationMs;
-  useRuntime
-    .getState()
-    .setState({
-      remainingMillis: durationMs,
-      status: "running",
-      endTime: targetEnd,
-    });
+  useRuntime.getState().setState({
+    remainingMillis: durationMs,
+    status: "running",
+    endTime: targetEnd,
+  });
   startLoop();
 }
 
@@ -72,7 +70,6 @@ export function stopTimer() {
   onComplete = null;
 }
 
-// NUEVO: ajuste preciso en caliente
 export function adjustTimer(deltaMs: number) {
   const s = useRuntime.getState();
   const now = Date.now();
@@ -91,5 +88,4 @@ export function adjustTimer(deltaMs: number) {
     const newRem = Math.max(0, s.remainingMillis + deltaMs);
     useRuntime.getState().setState({ remainingMillis: newRem });
   }
-  // idle: ignoramos
 }

@@ -57,10 +57,6 @@ export async function getSequence(id: string): Promise<Sequence | undefined> {
   return row ?? undefined;
 }
 
-/**
- * Mueve una secuencia intercambiando su orderIndex con el vecino objetivo (swap atómico).
- * Evita el UNIQUE usando un índice temporal muy negativo durante la transacción.
- */
 export async function bumpOrder(
   groupId: string,
   id: string,
@@ -78,17 +74,15 @@ export async function bumpOrder(
     [groupId, newIndex]
   );
 
-  const TEMP = -Math.floor(Date.now() % 1_000_000); // improbable colisión
+  const TEMP = -Math.floor(Date.now() % 1_000_000);
 
   await db.execAsync("BEGIN");
   try {
-    // 1) aparcar el actual en índice temporal
     await db.runAsync(`UPDATE Sequences SET orderIndex=? WHERE id=?`, [
       TEMP,
       curr.id,
     ]);
 
-    // 2) si hay vecino, ponerlo en el hueco original del actual
     if (neighbor) {
       await db.runAsync(`UPDATE Sequences SET orderIndex=? WHERE id=?`, [
         curr.orderIndex,
@@ -96,7 +90,6 @@ export async function bumpOrder(
       ]);
     }
 
-    // 3) mover el actual al nuevo índice
     await db.runAsync(`UPDATE Sequences SET orderIndex=? WHERE id=?`, [
       newIndex,
       curr.id,
