@@ -1,29 +1,33 @@
 {
   "expo": {
-    "name": "temporizador-secuencial",
+    "name": "Temporizador Secuencial",
     "slug": "temporizador-secuencial",
+    "scheme": "tempsec",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
+      "backgroundColor": "#000000"
     },
     "android": {
+      "package": "com.tu.nombre.temporizadorsecuencial",
+      "permissions": ["VIBRATE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+        "backgroundColor": "#000000"
+      }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "plugins": [
+      [
+        "expo-notifications",
+        { "icon": "./assets/notification-icon.png", "color": "#000000" }
+      ]
+    ],
+    "extra": {
+      "eas": { "projectId": "FILL_ME_BY_EAS" }
     }
   }
 }
