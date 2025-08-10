@@ -1,4 +1,5 @@
 import { Audio, InterruptionModeAndroid } from "expo-av";
+import { logEvent, logWarn } from "../instrumentation/logger";
 
 let tickSound: Audio.Sound | null = null;
 let alarmSound: Audio.Sound | null = null;
@@ -24,8 +25,9 @@ export async function playTick(volume: number) {
     }
     await tickSound.setVolumeAsync(volume);
     await tickSound.playAsync();
+    logEvent("AudioTickStart", { volume });
   } catch (e) {
-    console.error(e);
+    logWarn("AudioTickError", { message: String((e as any)?.message || e) });
   }
 }
 
@@ -46,6 +48,8 @@ export async function playAlarmOnce() {
     }
     await alarmSound.replayAsync();
   } catch (e) {
-    console.error(e);
+    logWarn("playAlarmOnceError", {
+      message: String((e as any)?.message || e),
+    });
   }
 }

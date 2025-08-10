@@ -1,60 +1,97 @@
+// sequences repo
 import { Sequence } from "../../domain/models";
+import { logWarn } from "../../instrumentation/logger";
 import { getDb } from "../db";
 
 export async function listSequencesByGroup(
   groupId: string
 ): Promise<Sequence[]> {
-  const db = await getDb();
-  return await db.getAllAsync<Sequence>(
-    `SELECT * FROM Sequences WHERE groupId=? ORDER BY orderIndex ASC`,
-    [groupId]
-  );
+  try {
+    const db = await getDb();
+    return await db.getAllAsync<Sequence>(
+      `SELECT * FROM Sequences WHERE groupId=? ORDER BY orderIndex ASC`,
+      [groupId]
+    );
+  } catch (e) {
+    logWarn("DB:listSequencesByGroupError", {
+      message: String((e as any)?.message || e),
+    });
+    throw e;
+  }
 }
 
 export async function insertSequence(s: Sequence): Promise<void> {
-  const db = await getDb();
-  await db.runAsync(
-    `INSERT INTO Sequences (id, groupId, orderIndex, emoji, title, durationMinutes, colorHex)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      s.id,
-      s.groupId,
-      s.orderIndex,
-      s.emoji ?? null,
-      s.title,
-      s.durationMinutes,
-      s.colorHex,
-    ]
-  );
+  try {
+    const db = await getDb();
+    await db.runAsync(
+      `INSERT INTO Sequences (id, groupId, orderIndex, emoji, title, durationMinutes, colorHex)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        s.id,
+        s.groupId,
+        s.orderIndex,
+        s.emoji ?? null,
+        s.title,
+        s.durationMinutes,
+        s.colorHex,
+      ]
+    );
+  } catch (e) {
+    logWarn("DB:insertSequenceError", {
+      message: String((e as any)?.message || e),
+    });
+    throw e;
+  }
 }
 
 export async function updateSequence(s: Sequence): Promise<void> {
-  const db = await getDb();
-  await db.runAsync(
-    `UPDATE Sequences SET orderIndex=?, emoji=?, title=?, durationMinutes=?, colorHex=? WHERE id=?`,
-    [
-      s.orderIndex,
-      s.emoji ?? null,
-      s.title,
-      s.durationMinutes,
-      s.colorHex,
-      s.id,
-    ]
-  );
+  try {
+    const db = await getDb();
+    await db.runAsync(
+      `UPDATE Sequences SET orderIndex=?, emoji=?, title=?, durationMinutes=?, colorHex=? WHERE id=?`,
+      [
+        s.orderIndex,
+        s.emoji ?? null,
+        s.title,
+        s.durationMinutes,
+        s.colorHex,
+        s.id,
+      ]
+    );
+  } catch (e) {
+    logWarn("DB:updateSequenceError", {
+      message: String((e as any)?.message || e),
+    });
+    throw e;
+  }
 }
 
 export async function deleteSequence(id: string): Promise<void> {
-  const db = await getDb();
-  await db.runAsync(`DELETE FROM Sequences WHERE id=?`, [id]);
+  try {
+    const db = await getDb();
+    await db.runAsync(`DELETE FROM Sequences WHERE id=?`, [id]);
+  } catch (e) {
+    logWarn("DB:deleteSequenceError", {
+      message: String((e as any)?.message || e),
+    });
+    throw e;
+  }
 }
 
 export async function getSequence(id: string): Promise<Sequence | undefined> {
-  const db = await getDb();
-  const row = await db.getFirstAsync<Sequence>(
-    `SELECT * FROM Sequences WHERE id=?`,
-    [id]
-  );
-  return row ?? undefined;
+  try {
+    const db = await getDb();
+    const row = await db.getFirstAsync<Sequence>(
+      `SELECT * FROM Sequences WHERE id=?`,
+      [id]
+    );
+    return row ?? undefined;
+  } catch (e) {
+    logWarn("DB:getSequenceError", {
+      message: String((e as any)?.message || e),
+    });
+    throw e;
+  }
 }
 
 export async function bumpOrder(
@@ -98,16 +135,26 @@ export async function bumpOrder(
     await db.execAsync("COMMIT");
   } catch (e) {
     await db.execAsync("ROLLBACK");
+    logWarn("DB:bumpOrderError", {
+      message: String((e as any)?.message || e),
+    });
     throw e;
   }
 }
 
 export async function getNextOrderIndex(groupId: string): Promise<number> {
-  const db = await getDb();
-  const row = await db.getFirstAsync<{ max: number | null }>(
-    `SELECT MAX(orderIndex) as max FROM Sequences WHERE groupId=?`,
-    [groupId]
-  );
-  const max = row?.max ?? -1;
-  return (typeof max === "number" ? max : Number(max)) + 1;
+  try {
+    const db = await getDb();
+    const row = await db.getFirstAsync<{ max: number | null }>(
+      `SELECT MAX(orderIndex) as max FROM Sequences WHERE groupId=?`,
+      [groupId]
+    );
+    const max = row?.max ?? -1;
+    return (typeof max === "number" ? max : Number(max)) + 1;
+  } catch (e) {
+    logWarn("DB:getNextOrderIndexError", {
+      message: String((e as any)?.message || e),
+    });
+    throw e;
+  }
 }

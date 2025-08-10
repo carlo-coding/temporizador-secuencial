@@ -1,3 +1,4 @@
+import { logEvent } from "../instrumentation/logger";
 import { useRuntime } from "./runtimeStore";
 
 let tickHandle: any = null;
@@ -13,6 +14,7 @@ function stopTick() {
 
 function finish() {
   stopTick();
+  logEvent("TimerFinish");
   useRuntime
     .getState()
     .setState({ status: "idle", remainingMillis: 0, endTime: null });
@@ -35,6 +37,7 @@ export function startTimer(durationMs: number, onDone?: () => void) {
   onComplete = onDone ?? null;
   const now = Date.now();
   targetEnd = now + durationMs;
+  logEvent("TimerStart", { durationMs, targetEnd });
   useRuntime.getState().setState({
     remainingMillis: durationMs,
     status: "running",
@@ -51,6 +54,7 @@ export function pauseTimer() {
   useRuntime
     .getState()
     .setState({ status: "paused", remainingMillis: rem, endTime: null });
+  logEvent("TimerPause", { remaining: rem });
 }
 
 export function resumeTimer(onDone?: () => void) {
@@ -68,6 +72,7 @@ export function stopTimer() {
     .getState()
     .setState({ status: "idle", remainingMillis: 0, endTime: null });
   onComplete = null;
+  logEvent("TimerStop");
 }
 
 export function adjustTimer(deltaMs: number) {
@@ -88,4 +93,5 @@ export function adjustTimer(deltaMs: number) {
     const newRem = Math.max(0, s.remainingMillis + deltaMs);
     useRuntime.getState().setState({ remainingMillis: newRem });
   }
+  logEvent("TimerAdjust", { deltaMs, status: s.status });
 }

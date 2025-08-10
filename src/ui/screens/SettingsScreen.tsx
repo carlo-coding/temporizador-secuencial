@@ -3,6 +3,7 @@ import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import { Button, Divider, Switch, Text } from "react-native-paper";
+import { exportCurrentLogPath, purgeAllLogs } from "../../../App";
 import {
   getSettings,
   saveSettings,
@@ -11,6 +12,7 @@ import {
   exportAll,
   importAllReplace,
 } from "../../domain/usecases/importExport";
+import { logEvent } from "../../instrumentation/logger";
 
 export default function SettingsScreen() {
   const [announceStart, setAnnounceStart] = useState(true);
@@ -107,6 +109,35 @@ export default function SettingsScreen() {
           }}
         >
           Importar (sobrescribe todo)
+        </Button>
+      </View>
+      <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
+        <Button
+          mode="outlined"
+          onPress={async () => {
+            const path = await exportCurrentLogPath();
+            if (await Sharing.isAvailableAsync())
+              await Sharing.shareAsync(path);
+          }}
+        >
+          Exportar logs
+        </Button>
+        <Button
+          mode="text"
+          onPress={async () => {
+            await purgeAllLogs();
+          }}
+        >
+          Borrar logs
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={() => {
+            logEvent("SimulatedCrash");
+            throw new Error("Crash intencional de prueba");
+          }}
+        >
+          Probar crash
         </Button>
       </View>
     </View>
