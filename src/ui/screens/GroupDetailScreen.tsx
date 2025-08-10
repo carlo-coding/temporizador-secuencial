@@ -100,6 +100,9 @@ export default function GroupDetailScreen({ route }: P) {
     adjustTimer(msDelta);
   }
 
+  const watchingActive =
+    runtime.currentGroupId == groupId && currentSeq()?.title;
+
   return (
     <View style={{ flex: 1, padding: 12, paddingBottom: 12 + insets.bottom }}>
       <Text variant="titleLarge">
@@ -109,10 +112,12 @@ export default function GroupDetailScreen({ route }: P) {
       <Card style={{ marginVertical: 8 }}>
         <Card.Content style={{ gap: 8, alignItems: "center" }}>
           <Text variant="displayMedium">
-            {msToHHMMSS(runtime.remainingMillis)}
+            {msToHHMMSS(watchingActive ? runtime.remainingMillis : 0)}
           </Text>
           <Text variant="titleMedium">
-            {currentSeq()?.title ?? "Sin secuencia seleccionada"}
+            {watchingActive
+              ? currentSeq()?.title
+              : "Sin secuencia seleccionada"}
           </Text>
           <View
             style={{
@@ -176,8 +181,8 @@ export default function GroupDetailScreen({ route }: P) {
                 startSequenceAt(next);
               }}
             />
-            <IconButton icon="minus" onPress={() => onAdjust(-10000)} />
-            <IconButton icon="plus" onPress={() => onAdjust(+10000)} />
+            <IconButton icon="minus" onPress={() => onAdjust(-30000)} />
+            <IconButton icon="plus" onPress={() => onAdjust(+30000)} />
             <Button
               onPress={() => {
                 stopTimer();
@@ -225,12 +230,23 @@ export default function GroupDetailScreen({ route }: P) {
               colorHex={item.colorHex}
               onEdit={() => setEditor({ visible: true, editId: item.id })}
               onDelete={async () => {
-                await deleteSequence(item.id);
-                if (runtime.currentSequenceIndex >= seqs.length - 1)
-                  runtime.setState({
-                    currentSequenceIndex: Math.max(0, seqs.length - 2),
-                  });
-                refresh();
+                Alert.alert("Confirmación", "¿Quieres borrar esta tarea?", [
+                  {
+                    text: "Cancelar",
+                    style: "cancel",
+                  },
+                  {
+                    text: "Confirmar",
+                    async onPress() {
+                      await deleteSequence(item.id);
+                      if (runtime.currentSequenceIndex >= seqs.length - 1)
+                        runtime.setState({
+                          currentSequenceIndex: Math.max(0, seqs.length - 2),
+                        });
+                      refresh();
+                    },
+                  },
+                ]);
               }}
               onUp={async () => {
                 await bumpOrder(groupId, item.id, -1);
@@ -241,11 +257,14 @@ export default function GroupDetailScreen({ route }: P) {
                 refresh();
               }}
               onDuplicate={async () => {
+                const maxOrderIndex = Math.max(
+                  ...seqs.map((s) => s.orderIndex)
+                );
                 await insertSequence({
                   ...item,
                   id: uuidv4(),
-                  orderIndex: item.orderIndex + 1,
-                  title: item.title + " (cop)",
+                  orderIndex: maxOrderIndex + 1,
+                  title: item.title,
                 });
                 refresh();
               }}

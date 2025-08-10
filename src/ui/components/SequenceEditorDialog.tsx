@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
-import { Button, Dialog, Portal, Text, TextInput } from "react-native-paper";
+import { Button, Dialog, Portal, Text } from "react-native-paper";
 import {
   ensureDuration,
   isColorHexValid,
   nonEmpty,
 } from "../../domain/validation";
 import DurationPicker from "./DurationPicker";
+import { StableTextInput } from "./StableTextInput";
 
 type Props = {
   visible: boolean;
@@ -69,13 +70,21 @@ export default function SequenceEditorDialog({
         <Dialog.Content>
           <View style={{ gap: 8 }}>
             <Text>Emoji (opcional)</Text>
-            <TextInput mode="outlined" value={emoji} onChangeText={setEmoji} />
+            <StableTextInput
+              mode="outlined"
+              value={emoji}
+              onChangeText={setEmoji}
+            />
             <Text>Título</Text>
-            <TextInput mode="outlined" value={title} onChangeText={setTitle} />
+            <StableTextInput
+              mode="outlined"
+              value={title}
+              onChangeText={setTitle}
+            />
             <Text>Duración</Text>
             <DurationPicker minutes={minutes} onChange={setMinutes} />
-            <Text>Color #RRGGBB</Text>
-            <TextInput
+            <Text style={{ color: colorHex }}>Color {colorHex}</Text>
+            <StableTextInput
               mode="outlined"
               value={colorHex}
               onChangeText={setColorHex}

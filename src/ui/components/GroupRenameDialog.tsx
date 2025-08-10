@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Button, Dialog, Portal, TextInput } from "react-native-paper";
+import { Button, Dialog, Portal } from "react-native-paper";
+import { StableTextInput } from "./StableTextInput";
 
 export default function GroupRenameDialog({
   visible,
@@ -22,7 +23,7 @@ export default function GroupRenameDialog({
       <Dialog visible={visible} onDismiss={onCancel}>
         <Dialog.Title>Renombrar grupo</Dialog.Title>
         <Dialog.Content>
-          <TextInput
+          <StableTextInput
             mode="outlined"
             value={name}
             onChangeText={setName}

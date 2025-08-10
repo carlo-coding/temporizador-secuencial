@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import {
   Button,
   Card,
@@ -10,6 +10,7 @@ import {
   Text,
   TextInput,
 } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RootStackParamList } from "../../app/AppNavigator";
 import {
   deleteGroup,
@@ -21,8 +22,10 @@ import { listSequencesByGroup } from "../../data/repositories/sequencesRepo";
 import { Group } from "../../domain/models";
 import { computeTotalMinutes } from "../../domain/usecases/computeGroupDuration";
 import { importSingleGroup } from "../../domain/usecases/importExport";
+import { useRuntime } from "../../runtime/runtimeStore";
 import { formateaTiempo } from "../../utils/formateaTiempo";
 import { uuidv4 } from "../../utils/uuid";
+import { Dot } from "../components/Dot";
 import GroupRenameDialog from "../components/GroupRenameDialog";
 
 type P = NativeStackScreenProps<RootStackParamList, "Groups">;
@@ -35,8 +38,11 @@ export default function GroupsScreen({ navigation }: P) {
     null
   );
 
+  const insets = useSafeAreaInsets();
+
   async function refresh() {
-    setGroups(await listGroups());
+    let groups = await listGroups();
+    if (groups) setGroups(groups);
   }
   useEffect(() => {
     refresh();
@@ -101,18 +107,31 @@ export default function GroupsScreen({ navigation }: P) {
 
       <Divider />
 
-      {groups.map((g) => (
-        <GroupRow
-          key={g.id}
-          g={g}
-          onOpen={() => navigation.navigate("GroupDetail", { groupId: g.id })}
-          onRename={() => setRename({ id: g.id, name: g.name })}
-          onDelete={async () => {
-            await deleteGroup(g.id);
-            refresh();
-          }}
-        />
-      ))}
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}>
+        {groups.map((g) => (
+          <GroupRow
+            key={g.id}
+            g={g}
+            onOpen={() => navigation.navigate("GroupDetail", { groupId: g.id })}
+            onRename={() => setRename({ id: g.id, name: g.name })}
+            onDelete={async () => {
+              Alert.alert("Confirmación", "¿Quieres borrar este grupo?", [
+                {
+                  text: "Cancelar",
+                  style: "cancel",
+                },
+                {
+                  text: "Confirmar",
+                  async onPress() {
+                    await deleteGroup(g.id);
+                    refresh();
+                  },
+                },
+              ]);
+            }}
+          />
+        ))}
+      </ScrollView>
 
       <Snackbar
         visible={!!snack}
@@ -157,6 +176,8 @@ function GroupRow({
     })();
   }, []);
 
+  const { currentGroupId, status } = useRuntime();
+
   return (
     <Card style={{ marginTop: 8 }} onPress={onOpen}>
       <Card.Title
@@ -164,6 +185,12 @@ function GroupRow({
         subtitle={formateaTiempo(total)}
         right={() => (
           <View style={{ flexDirection: "row" }}>
+            {g.id == currentGroupId && status != "idle" && (
+              <Dot
+                style={{ marginTop: 20, marginRight: 10 }}
+                color={status == "running" ? "#2ecc71" : "#FE9900"}
+              />
+            )}
             <IconButton icon="pencil" onPress={onRename} />
             <IconButton icon="delete" onPress={onDelete} />
           </View>

@@ -1,6 +1,6 @@
 import Slider from "@react-native-community/slider";
 import * as Sharing from "expo-sharing";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, View } from "react-native";
 import { Button, Divider, Switch, Text } from "react-native-paper";
 import { exportCurrentLogPath, purgeAllLogs } from "../../../App";
@@ -21,16 +21,21 @@ export default function SettingsScreen() {
   const [alarmEnabled, setAlarmEnabled] = useState(true);
   const [tickTackVolume, setTickTackVolume] = useState(0.5);
 
+  const fetchedSettings = useRef(false);
+
   useEffect(() => {
-    (async () => {
-      const s = await getSettings();
-      setAnnounceStart(s.announceStart);
-      setAnnounceCountdown(s.announceCountdown);
-      setTickTackEnabled(s.tickTackEnabled);
-      setAlarmEnabled(s.alarmEnabled);
-      setTickTackVolume(s.tickTackVolume);
-    })();
-  }, []);
+    if (!fetchedSettings.current) {
+      (async () => {
+        const s = await getSettings();
+        setAnnounceStart(s.announceStart);
+        setAnnounceCountdown(s.announceCountdown);
+        setTickTackEnabled(s.tickTackEnabled);
+        setAlarmEnabled(s.alarmEnabled);
+        setTickTackVolume(s.tickTackVolume);
+        fetchedSettings.current = true;
+      })();
+    }
+  }, [fetchedSettings.current]);
 
   return (
     <View style={{ flex: 1, padding: 12, gap: 12 }}>
